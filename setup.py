@@ -1,30 +1,29 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
+import pathlib
 
-try:  # pip >= 10
-    from pip._internal.download import PipSession
-except ImportError:  # pip <= 9.0.3
-    from pip.download import PipSession
-from pip.req import parse_requirements as requirements
+import pkg_resources
 from setuptools import setup
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-if sys.version_info[0] == 2:
-    from codecs import open
 
-
-def parse_requirements(req_file):
-    return [str(req.req) for req in requirements(req_file, session=PipSession())]
+def parse_requirements_file(requirements_file):
+    with pathlib.Path(requirements_file).open() as requirements_txt:
+        install_requires = [
+            str(requirement)
+            for requirement
+            in pkg_resources.parse_requirements(requirements_txt)
+        ]
+    return install_requires
 
 
 # Read requirements
 _requirements_file = os.path.join(BASE_DIR, 'requirements.txt')
 _tests_requirements_file = os.path.join(BASE_DIR, 'requirements-tests.txt')
-_REQUIRES = parse_requirements(_requirements_file)
-_TESTS_REQUIRES = parse_requirements(_tests_requirements_file)
+_REQUIRES = parse_requirements_file(_requirements_file)
+_TESTS_REQUIRES = parse_requirements_file(_tests_requirements_file)
 
 # Read description
 with open(os.path.join(BASE_DIR, 'README.rst'), encoding='utf-8') as f:
